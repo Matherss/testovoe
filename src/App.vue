@@ -1,6 +1,19 @@
 <template>
-  <div class="wrapper">
-    <input type="text" v-model="searchText" placeholder="Название команды" />
+  <div v-if="loading">
+    <h2>Page Loading...Please Wait</h2>
+  </div>
+  <div v-if="info" class="wrapper">
+    <div v-for="(team, idx) of teams" :key="idx">
+      <input
+        type="checkbox"
+        :id="team"
+        :key="idx"
+        :value="team"
+        v-model="checkedNames"
+        :disabled="checkedNames.length == 2 && checkedNames.indexOf(team) === -1"
+      />
+      <label :for="team">{{ team }}</label>
+    </div>
     <div class="container">
       <card
         v-for="(item, index) of filters"
@@ -38,16 +51,19 @@ export default {
     return {
       info: null,
       limit: 0,
-      searchText: ""
+      loading: true,
+      teams: [],
+      checkedNames: []
     };
   },
-  beforeMount() {
-    this.update();
+  async beforeMount() {
+    await this.update();
   },
   methods: {
-    update() {
-      this.limit = this.limit + 10;
-      axios({
+    async update() {
+      this.loading = true;
+      this.limit += 10;
+      await axios({
         url: "https://footballista.ru/graphql",
         method: "post",
         data: {
@@ -67,18 +83,48 @@ export default {
   }
  }}`
         }
-      }).then((result) => {
-        this.info = result.data;
-        console.log(this.info);
-      });
+      })
+        .then((result) => {
+          this.info = result.data;
+          const teamsmap = this.info.data.Season.calendar.items.reduce((acc, game) => {
+            return { ...acc, ...{ [game.teamHome.name]: game.teamHome.name } };
+          }, {});
+
+          // for (let i = 0; i < this.info.data.Season.calendar.items.length; i++) {
+          //   // if (this.teams.indexOf(this.info.data.Season.calendar.items[i].teamHome.name) == -1)
+          //   // this.teams.push(this.info.data.Season.calendar.items[i].teamHome.name);
+
+          //     teamsmap[this.info.data.Season.calendar.items[i].teamHome.name] = this.info.data.Season.calendar.items[i].teamHome.name;
+
+          // }
+          this.teams = Object.values(teamsmap);
+
+          for (let i = 0; i < this.info.data.Season.calendar.items.length; i++) {
+            if (this.teams.indexOf(this.info.data.Season.calendar.items[i].teamAway.name) !== -1) continue;
+            this.teams.push(this.info.data.Season.calendar.items[i].teamAway.name);
+          }
+          console.log(this.teams);
+          console.log(result.data);
+        })
+        .catch((err) => {
+          console.log("ERR" + err);
+        })
+        .finally(() => (this.loading = false));
     }
   },
   computed: {
     filters() {
-      let regexp = new RegExp(this.searchText, "i");
-      return this.info.data.Season.calendar.items.filter(
-        (item) => item.teamHome.name.match(regexp) || item.teamAway.name.match(regexp)
-      );
+      console.log(this.checkedNames);
+      const { items } = this.info.data.Season.calendar;
+      if (this.checkedNames) {
+        console.log(this.checkedNames);
+        let regex = new RegExp(this.checkedNames[0], "i");
+        let regex2 = new RegExp(this.checkedNames[1], "i");
+        return items
+          .filter((item) => item.teamHome.name.match(regex) || item.teamAway.name.match(regex))
+          .filter((item) => item.teamHome.name.match(regex2) || item.teamAway.name.match(regex2));
+      }
+      return items;
     }
   }
 };
@@ -99,6 +145,9 @@ export default {
   grid-template-columns: 1fr 1fr;
   justify-items: center;
   grid-gap: 2px;
+}
+.container:nth-child(4n) {
+  grid-column: span 2;
 }
 @media screen and (max-width: 767px) {
   .container {
@@ -143,5 +192,8 @@ button:hover {
     line-height: 55px;
     width: 150px;
   }
+}
+input[type="checkbox"]:disabled {
+  background: red;
 }
 </style>

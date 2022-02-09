@@ -67,6 +67,10 @@ export default {
   justify-content: center;
   text-align: center;
   margin: 0;
+  transition: 0.5s all ease-in-out;
+}
+.games:hover {
+  transform: translateY(5px);
 }
 .card__wrapper {
   padding: 5px;
