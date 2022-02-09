@@ -146,9 +146,7 @@ export default {
   justify-items: center;
   grid-gap: 2px;
 }
-.container:nth-child(4n) {
-  grid-column: span 2;
-}
+
 @media screen and (max-width: 767px) {
   .container {
     grid-template-columns: 1fr;
