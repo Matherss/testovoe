@@ -67,10 +67,10 @@ export default {
   justify-content: center;
   text-align: center;
   margin: 0;
-  transition: 0.5s all ease-in-out;
+  transition: 0.5s all ease-in-out 0.2s;
 }
 .games:hover {
-  transform: translateY(5px);
+  transform: translateY(-2px);
 }
 .card__wrapper {
   padding: 5px;
@@ -78,7 +78,7 @@ export default {
 
 .firstTeam,
 .secondTeam {
-  border: 1px solid black;
+  border: 1px solid var(--border-color);
   width: 272px;
   padding: 10px;
   display: flex;

@@ -130,17 +130,23 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+:root {
+  --border-color: green;
+}
+@mixin max_width {
+  max-width: 1230px;
+}
 * {
   box-sizing: border-box;
   margin: 0;
 }
 .wrapper {
-  max-width: 1230px;
+  @include max_width;
   margin: 0 auto;
 }
 .container {
-  max-width: 1230px;
+  @include max_width;
   display: grid;
   grid-template-columns: 1fr 1fr;
   justify-items: center;
@@ -192,6 +198,6 @@ button:hover {
   }
 }
 input[type="checkbox"]:disabled {
-  background: red;
+  border: 1px solid var(--border-color);
 }
 </style>
